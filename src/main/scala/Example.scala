@@ -9,23 +9,23 @@ object SlickHandsOn {
   val url = "jdbc:h2:mem:test;INIT=runscript from 'src/main/sql/create.sql'"
   val db = Database.forURL(url, driver = "org.h2.Driver")
 
-  def computersByCompany() = {
+  def computersByCompany(implicit session: Session) = {
     // Using generated code. Our Build.sbt makes sure they are generated before compilation.
     val q = Companies.join(Computers).on(_.id === _.manufacturerId)
       .map { case (co, cp) => (co.name, cp.name)}
 
-    db.withTransaction { implicit session =>
-      println(q.run.groupBy { case (co, cp) => co}
-        .mapValues(_.map { case (co, cp) => cp})
-        .mkString("\n")
-      )
-    }
+    q.run.groupBy { case (co, cp) => co}
+      .mapValues(_.map { case (co, cp) => cp})
+      .mkString("\n")
   }
 
   def main(args: Array[String]) = {
     println("Select running option:")
-    readInt() match {
-      case 1 => computersByCompany()
+    db.withTransaction { implicit session =>
+      val result = readInt() match {
+        case 1 => computersByCompany
+      }
+      println(result)
     }
   }
 }
