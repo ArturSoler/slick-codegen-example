@@ -24,6 +24,7 @@ object SlickHandsOn {
     db.withTransaction { implicit session =>
       val result = readInt() match {
         case 1 => computersByCompany
+        case _ => "Invalid option"
       }
       println(result)
     }
